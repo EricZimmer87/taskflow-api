@@ -2,7 +2,7 @@
 {
     public class TaskItem
     {
-        public int TaskId { get; set; }
+        public int TaskItemId { get; set; }
         public int UserId { get; set; }
         public User User { get; set; } = null!;
         public string Title { get; set; } = string.Empty;
