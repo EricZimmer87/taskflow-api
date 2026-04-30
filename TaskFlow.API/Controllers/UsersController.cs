@@ -21,7 +21,7 @@ namespace TaskFlow.API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<User>>> GetUsers()
         {
-            var users = _context.Users.ToListAsync();
+            var users = await _context.Users.ToListAsync();
             return Ok(users);
         }
     }
