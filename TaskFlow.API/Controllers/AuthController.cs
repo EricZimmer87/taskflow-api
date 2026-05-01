@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using TaskFlow.API.Data;
 using TaskFlow.API.DTOs;
 using TaskFlow.API.Models;
+using TaskFlow.API.Services;
 
 namespace TaskFlow.API.Controllers
 {
@@ -16,14 +13,14 @@ namespace TaskFlow.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly ITokenService _tokenService;
         private readonly PasswordHasher<User> _passwordHasher = new();
 
         // Constructor
-        public AuthController(AppDbContext context, IConfiguration configuration)
+        public AuthController(AppDbContext context, ITokenService tokenService)
         {
             _context = context;
-            _configuration = configuration;
+            _tokenService = tokenService;
         }
 
         // POST: /api/auth/register
@@ -48,7 +45,7 @@ namespace TaskFlow.API.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            var token = GenerateJwtToken(user);
+            var token = _tokenService.GenerateToken(user);
 
             return Ok(new AuthResponse { Token = token });
         }
@@ -75,36 +72,9 @@ namespace TaskFlow.API.Controllers
                 return Unauthorized("Invalid email or password.");
             }
 
-            var token = GenerateJwtToken(user);
+            var token = _tokenService.GenerateToken(user);
 
             return Ok(new AuthResponse { Token = token });
-        }
-
-        // TokenService generates JWT
-        private string GenerateJwtToken(User user)
-        {
-            var jwtKey = _configuration["Jwt:Key"]!;
-            var jwtIssuer = _configuration["Jwt:Issuer"]!;
-            var jwtAudience = _configuration["Jwt:Audience"]!;
-            var expiresInMinutes = int.Parse(_configuration["Jwt:ExpiresInMinutes"]!);
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Email, user.Email)
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: jwtIssuer,
-                audience: jwtAudience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(expiresInMinutes),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
