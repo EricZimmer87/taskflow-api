@@ -130,7 +130,7 @@ JWT settings are configured in `appsettings.json`.
 Example:
 
     "Jwt": {
-      "Key": "DEVELOPMENT_ONLY_FAKE_KEY_CHANGE_BEFORE_PRODUCTION",
+      "Key": "FAKE_KEY_CHANGE_FOR_PRODUCTION_123456789",
       "Issuer": "TaskFlow.API",
       "Audience": "TaskFlow.Client",
       "ExpiresInMinutes": 60
