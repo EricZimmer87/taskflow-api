@@ -43,7 +43,7 @@ namespace TaskFlow.API.Controllers
             return Ok(taskItems);
         }
 
-        //GET: api/TaskItem/2
+        // GET: api/TaskItem/2
         [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskItemResponse>> GetTaskItem(int id)
